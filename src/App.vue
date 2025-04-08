@@ -1,9 +1,9 @@
 <script setup>
 import {ref, computed} from 'vue'
 import {debounce} from "lodash";
+import {fetchWeather} from "@/services/weatherService.js";
 
 const inputValue = ref('')
-const API_KEY = '5a319f3fc0edf91ca28ae601bdce9115'
 const someShit = ref(null)
 const error = ref('')
 const imageUrl = computed(() => {
@@ -14,20 +14,11 @@ const imageUrl = computed(() => {
   }
 });
 
-async function fetchWeather() {
-  if (!inputValue.value.trim()) {
-    error.value = 'Введите город';
-    return;
-  }
-
-  try {
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${inputValue.value}&units=metric&lang=ru&appid=${API_KEY}`);
-    if (!response.ok) throw new Error('Город не найден');
-    someShit.value = await response.json();
-    // imageUrl.value = imageTest(someShit.value.weather[0].icon)
-  } catch (err) {
-    error.value = err.message;
-    console.log('ошибка', err);
+async function getWeather() {
+  try{
+    someShit.value = await fetchWeather(inputValue.value.trim())
+  } catch (e) {
+    error.value = e.value
   }
 }
 
@@ -41,7 +32,7 @@ function imageTest(name) {
 }
 
 
-const debounced = debounce(fetchWeather, 500)
+const debounced = debounce(getWeather, 500)
 </script>
 
 <template>
